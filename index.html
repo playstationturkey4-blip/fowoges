@@ -1,480 +1,1223 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOWOGES</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #8a2be2;
-            --secondary: #000000;
-            --accent: #ff00ff;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-light: rgba(255, 255, 255, 0.9);
-            --text-dark: rgba(0, 0, 0, 0.85);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FOWOGES - Premium Outfit Builder</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        body {
-            background: linear-gradient(135deg, #0a0a0a, #1a0a1a);
-            color: var(--text-light);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                radial-gradient(circle at 10% 20%, rgba(138, 43, 226, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 20%);
-            z-index: -1;
-        }
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --glass-bg: rgba(139, 92, 246, 0.03);
+  --glass-border: rgba(139, 92, 246, 0.15);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b0;
+  --accent: #8b5cf6;
+  --accent-dark: #6d28d9;
+  --accent-glow: rgba(139, 92, 246, 0.25);
+  --canvas-bg: #ffffff;
+  --shadow: rgba(139, 92, 246, 0.2);
+  
+  /* Canvas dimensions for proportional scaling */
+  --canvas-width: 1200;
+  --canvas-height: 750;
+}
 
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 1.5rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            background: var(--glass-bg);
-            border-bottom: 1px solid var(--glass-border);
-            animation: fadeInDown 1s ease-out;
-        }
+body.light-mode {
+  --bg-primary: #fafafa;
+  --bg-secondary: #ffffff;
+  --glass-bg: rgba(139, 92, 246, 0.05);
+  --glass-border: rgba(139, 92, 246, 0.2);
+  --text-primary: #1a1a1a;
+  --text-secondary: #6e6e73;
+  --accent: #8b5cf6;
+  --accent-dark: #6d28d9;
+  --accent-glow: rgba(139, 92, 246, 0.15);
+  --canvas-bg: #ffffff;
+  --shadow: rgba(139, 92, 246, 0.15);
+}
 
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: 1px;
-        }
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background 0.4s ease, color 0.4s ease;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
+/* Animated purple gradient background */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(109, 40, 217, 0.06) 0%, transparent 50%);
+  animation: gradientMove 25s ease infinite;
+  pointer-events: none;
+  z-index: 0;
+}
 
-        .nav-links a {
-            color: var(--text-light);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 1.1rem;
-            position: relative;
-            padding: 0.5rem 0;
-            transition: all 0.3s ease;
-        }
+@keyframes gradientMove {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(5%, 5%) rotate(120deg); }
+  66% { transform: translate(-3%, 8%) rotate(240deg); }
+}
 
-        .nav-links a:hover {
-            color: var(--accent);
-        }
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.3s ease;
-        }
+/* Header - Centered Logo */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.7);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 28px 0;
+  animation: slideDown 0.6s ease;
+}
 
-        .nav-links a:hover::after {
-            width: 100%;
-        }
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 0 2rem;
-            position: relative;
-            overflow: hidden;
-        }
+.header-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
 
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-            z-index: -1;
-        }
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #d8b4fe 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-align: center;
+  position: relative;
+  filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.3));
+}
 
-        .hero h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            line-height: 1.2;
-            animation: fadeInUp 1s ease-out;
-        }
+.logo:hover {
+  transform: scale(1.05);
+  letter-spacing: 14px;
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.5));
+}
 
-        .hero p {
-            font-size: clamp(1.2rem, 3vw, 1.8rem);
-            max-width: 700px;
-            margin-bottom: 3rem;
-            opacity: 0.8;
-            animation: fadeInUp 1s ease-out 0.3s both;
-        }
+.theme-toggle {
+  position: absolute;
+  right: 32px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 10px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
 
-        .cta-button {
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            color: white;
-            border: none;
-            padding: 1.2rem 3rem;
-            font-size: 1.2rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 25px rgba(138, 43, 226, 0.3);
-            animation: fadeInUp 1s ease-out 0.6s both;
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-        }
+.theme-toggle:hover {
+  background: var(--glass-border);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
 
-        .cta-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(138, 43, 226, 0.4);
-        }
+/* Navigation */
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px 24px 50px;
+  animation: fadeIn 0.8s ease 0.2s both;
+}
 
-        /* Section Styling */
-        section {
-            padding: 6rem 5%;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-        .section-title {
-            font-size: 3rem;
-            text-align: center;
-            margin-bottom: 4rem;
-            position: relative;
-        }
+.nav button {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            border-radius: 2px;
-        }
+.nav button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: var(--accent-glow);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
 
-        /* Studio Section */
-        .studio-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
+.nav button:hover::before {
+  width: 300px;
+  height: 300px;
+}
 
-        .canvas {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            height: 60vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            position: relative;
-        }
+.nav button:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--accent-glow);
+}
 
-        .canvas::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                linear-gradient(rgba(138, 43, 226, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(138, 43, 226, 0.1) 1px, transparent 1px);
-            background-size: 30px 30px;
-        }
+.nav button.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 8px 25px var(--accent-glow);
+}
 
-        .canvas-content {
-            text-align: center;
-            opacity: 0.7;
-        }
+.nav button span {
+  position: relative;
+  z-index: 1;
+}
 
-        .canvas-content i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
+/* Screens */
+.screen {
+  display: none;
+  padding: 50px 24px 80px;
+  animation: fadeInScale 0.5s ease;
+}
 
-        .canvas-content p {
-            font-size: 1.2rem;
-        }
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
-        /* Gallery Section */
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
+.screen.active {
+  display: block;
+}
 
-        .gallery-item {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            overflow: hidden;
-            height: 300px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            position: relative;
-        }
+/* Hero Section */
+.hero {
+  min-height: 65vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 80px 24px;
+}
 
-        .gallery-item:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(138, 43, 226, 0.3);
-        }
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(52px, 8vw, 92px);
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #ffffff 0%, #d8b4fe 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeIn 0.8s ease 0.3s both;
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.2));
+}
 
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
+.hero p {
+  margin-top: 28px;
+  font-size: 20px;
+  color: var(--text-secondary);
+  font-weight: 300;
+  max-width: 600px;
+  line-height: 1.6;
+  animation: fadeIn 0.8s ease 0.5s both;
+}
 
-        .gallery-item:hover img {
-            transform: scale(1.1);
-        }
+.hero-cta {
+  margin-top: 48px;
+  animation: fadeIn 0.8s ease 0.7s both;
+}
 
-        .gallery-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+/* Canvas Wrapper */
+.canvas-wrapper {
+  max-width: 1200px;
+  margin: 0 auto 40px;
+}
 
-        .gallery-item:hover::before {
-            opacity: 0.1;
-        }
+.canvas {
+  width: 100%;
+  aspect-ratio: 16/10;
+  background: var(--canvas-bg);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--glass-border),
+    0 0 40px var(--accent-glow);
+  transition: all 0.4s ease;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.canvas:hover {
+  box-shadow: 
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px var(--accent),
+    0 0 60px var(--accent-glow);
+}
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.canvas-empty-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #ccc;
+  pointer-events: none;
+}
 
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
+.canvas-empty-state svg {
+  width: 80px;
+  height: 80px;
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
+.canvas-empty-state p {
+  font-size: 16px;
+  font-weight: 500;
+}
 
-            .hero h1 {
-                font-size: 2.5rem;
-            }
+/* Controls */
+.controls {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-            .hero p {
-                font-size: 1.2rem;
-            }
+button.primary {
+  padding: 15px 32px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 20px var(--accent-glow);
+  position: relative;
+  overflow: hidden;
+}
 
-            .section-title {
-                font-size: 2rem;
-            }
+button.primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
 
-            .canvas {
-                height: 40vh;
-            }
-        }
+button.primary:hover::before {
+  left: 100%;
+}
 
-        @media (max-width: 480px) {
-            nav {
-                padding: 1rem 5%;
-            }
+button.primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px var(--accent-glow);
+}
 
-            .hero h1 {
-                font-size: 2rem;
-            }
+button.primary:active {
+  transform: translateY(-1px);
+}
 
-            .section-title {
-                font-size: 1.8rem;
-            }
+button.secondary {
+  padding: 15px 32px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
 
-            .gallery {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+button.secondary:hover {
+  background: var(--glass-border);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--accent-glow);
+}
+
+/* Gallery */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.outfit {
+  background: var(--canvas-bg);
+  aspect-ratio: 16/10;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.4),
+    0 0 0 1px var(--glass-border);
+}
+
+.outfit:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--accent),
+    0 0 40px var(--accent-glow);
+}
+
+.outfit::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.4) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.outfit:hover::after {
+  opacity: 1;
+}
+
+/* Section Headers */
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 48px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--text-primary) 0%, #d8b4fe 50%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.2));
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 20px;
+  }
+  
+  .logo {
+    font-size: 32px;
+    letter-spacing: 8px;
+  }
+  
+  .logo:hover {
+    letter-spacing: 10px;
+  }
+  
+  .theme-toggle {
+    right: 20px;
+    padding: 8px 14px;
+  }
+  
+  .nav {
+    gap: 10px;
+    padding: 30px 20px 40px;
+  }
+  
+  .nav button {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+  
+  .controls {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  button.primary,
+  button.secondary {
+    width: 100%;
+  }
+  
+  .gallery {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  h2 {
+    font-size: 36px;
+    margin-bottom: 32px;
+  }
+  
+  .screen {
+    padding: 40px 20px 60px;
+  }
+}
+
+/* Image styling in canvas */
+.canvas img {
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.canvas img:hover {
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+}
+
+/* Gallery outfit images - prevent interaction */
+.outfit img {
+  border-radius: 6px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Empty gallery state */
+.empty-gallery {
+  text-align: center;
+  padding: 100px 24px;
+  color: var(--text-secondary);
+}
+
+.empty-gallery svg {
+  width: 120px;
+  height: 120px;
+  opacity: 0.2;
+  margin-bottom: 28px;
+  stroke: var(--accent);
+}
+
+.empty-gallery h3 {
+  font-size: 26px;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.empty-gallery p {
+  font-size: 16px;
+  font-weight: 300;
+}
+
+/* Notification styling */
+.notification {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--accent);
+  color: var(--text-primary);
+  padding: 18px 36px;
+  border-radius: 50px;
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.5),
+    0 0 40px var(--accent-glow);
+  font-weight: 600;
+  font-size: 15px;
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+/* Selected image styling */
+.canvas img.selected {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.6), 0 0 30px rgba(139, 92, 246, 0.4);
+}
+</style>
 </head>
+
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="logo">FOWOGES</div>
-        <ul class="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#studio">Studio</a></li>
-            <li><a href="#gallery">Gallery</a></li>
-        </ul>
-    </nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <h1>CREATE THE FUTURE</h1>
-        <p>Experience the intersection of art and technology in our premium digital studio</p>
-        <button class="cta-button">EXPLORE NOW</button>
-    </section>
+<header>
+  <div class="header-content">
+    <div class="logo" onclick="switchScreen('home', document.querySelector('.nav button'))">FOWOGES</div>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-icon">🌙</span>
+      <span id="theme-text">Dark</span>
+    </button>
+  </div>
+</header>
 
-    <!-- Studio Section -->
-    <section id="studio">
-        <h2 class="section-title">STUDIO</h2>
-        <div class="studio-container">
-            <div class="canvas">
-                <div class="canvas-content">
-                    <i class="fas fa-paint-brush"></i>
-                    <p>Empty Canvas - Ready for Creation</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="nav">
+  <button onclick="switchScreen('home', this)" class="active">
+    <span>Главная</span>
+  </button>
+  <button onclick="switchScreen('create', this)">
+    <span>Создать</span>
+  </button>
+  <button onclick="switchScreen('looks', this)">
+    <span>Образы</span>
+  </button>
+</div>
 
-    <!-- Gallery Section -->
-    <section id="gallery">
-        <h2 class="section-title">GALLERY</h2>
-        <div class="gallery">
-            <div class="gallery-item">
-                <img
-src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600&q=80src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?ixlib=rb-4.0.3&auto=format&fit=rop&w=600&h=600&q=80" alt="Artwork">
-            </div>
-            <div class="gallery-item">
-                <img
-src="https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600&qsrc="https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-4.0.3&auto=format&ft=crop&w=600&h=600&q=80" alt="Artwork">
-            </div>
-            <div class="gallery-item">
-                <img
-src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600&qsrc="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&ft=crop&w=600&h=600&q=80" alt="Artwork">
-            </div>
-            <div class="gallery-item">
-                <img
-src="https://images.unsplash.com/photo-1506905925346-8754374aee4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600&qsrc="https://images.unsplash.com/photo-1506905925346-8754374aee4d?ixlib=rb-4.0.3&auto=format&ft=crop&w=600&h=600&q=80" alt="Artwork">
-            </div>
-            <div class="gallery-item">
-                <img
-src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600&q=80src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?ixlib=rb-4.0.3&auto=format&fit=rop&w=600&h=600&q=80" alt="Artwork">
-            </div>
-            <div class="gallery-item">
-                <img
-src="https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600&qsrc="https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-4.0.3&auto=format&ft=crop&w=600&h=600&q=80" alt="Artwork">
-            </div>
-        </div>
-    </section>
+<!-- Главная -->
+<div id="home" class="screen active">
+  <div class="hero">
+    <h1>Build Your Identity</h1>
+    <p>Create stunning digital outfits and express your unique style with our premium builder</p>
+    <div class="hero-cta">
+      <button class="primary" onclick="switchScreen('create', document.querySelectorAll('.nav button')[1])">
+        Начать создание
+      </button>
+    </div>
+  </div>
+</div>
 
-    <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
+<!-- Создать -->
+<div id="create" class="screen">
+  <h2>Создать образ</h2>
 
-        // Animation on scroll
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
+  <div class="canvas-wrapper">
+    <div id="canvas" class="canvas">
+      <div class="canvas-empty-state" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+        <p>Добавьте изображения для начала</p>
+      </div>
+    </div>
+  </div>
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
-                }
-            });
-        }, observerOptions);
+  <div class="controls">
+    <button class="primary" onclick="fileInput.click()">
+      📷 Добавить фото
+    </button>
+    <button class="primary" onclick="openBgRemoval()">
+      ✂️ Удаление фона
+    </button>
+    <button class="primary" onclick="saveOutfit()">
+      💾 Сохранить
+    </button>
+    <button class="secondary" onclick="deleteSelected()">
+      🗑️ Удалить выбранное
+    </button>
+    <button class="secondary" onclick="clearCanvas()">
+      🗑️ Очистить
+    </button>
+  </div>
+</div>
 
-        document.querySelectorAll('section').forEach(section => {
-            observer.observe(section);
-        });
+<!-- Образы -->
+<div id="looks" class="screen">
+  <h2>Мои образы</h2>
+  <div id="gallery" class="gallery"></div>
+  <div id="emptyGallery" class="empty-gallery" style="display: none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="7" height="7"></rect>
+      <rect x="14" y="3" width="7" height="7"></rect>
+      <rect x="14" y="14" width="7" height="7"></rect>
+      <rect x="3" y="14" width="7" height="7"></rect>
+    </svg>
+    <h3>Пока нет сохранённых образов</h3>
+    <p>Создайте свой первый образ, чтобы увидеть его здесь</p>
+  </div>
+</div>
 
-        // Button hover effect
-        const ctaButton = document.querySelector('.cta-button');
-        ctaButton.addEventListener('mouseenter', () => {
-            ctaButton.style.transform = 'translateY(-5px)';
-        });
+<input type="file" id="fileInput" multiple accept="image/*" style="display:none;">
 
-        ctaButton.addEventListener('mouseleave', () => {
-            ctaButton.style.transform = 'translateY(0)';
-        });
-    </script>
+<script>
+
+/* ======================= */
+/* ПЕРЕМЕННЫЕ */
+/* ======================= */
+
+let outfits = JSON.parse(localStorage.getItem("outfits")) || [];
+const canvas = document.getElementById("canvas");
+const gallery = document.getElementById("gallery");
+const fileInput = document.getElementById("fileInput");
+const emptyState = document.getElementById("emptyState");
+const emptyGallery = document.getElementById("emptyGallery");
+
+// Canvas reference dimensions for proportional scaling
+const CANVAS_REF_WIDTH = 1200;
+const CANVAS_REF_HEIGHT = 750;
+
+// Selection state
+let selectedImage = null;
+
+/* ======================= */
+/* THEME TOGGLE */
+/* ======================= */
+
+function toggleTheme() {
+  document.body.classList.toggle('light-mode');
+  const isLight = document.body.classList.contains('light-mode');
+  document.getElementById('theme-icon').textContent = isLight ? '☀️' : '🌙';
+  document.getElementById('theme-text').textContent = isLight ? 'Light' : 'Dark';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+}
+
+// Load saved theme
+if (localStorage.getItem('theme') === 'light') {
+  toggleTheme();
+}
+
+/* ======================= */
+/* НАВИГАЦИЯ */
+/* ======================= */
+
+function switchScreen(id, btn) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+}
+
+/* ======================= */
+/* ДОБАВЛЕНИЕ ФОТО */
+/* ======================= */
+
+fileInput.addEventListener("change", function(e) {
+  if (emptyState) emptyState.style.display = 'none';
+
+  for (let file of e.target.files) {
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+      const img = document.createElement("img");
+      img.src = event.target.result;
+      img.style.position = "absolute";
+      img.style.left = "40px";
+      img.style.top = "40px";
+      img.style.width = "120px";
+      img.style.cursor = "move";
+      img.style.opacity = "0";
+
+      enableDrag(img);
+      canvas.appendChild(img);
+
+      // Fade in animation
+      setTimeout(() => {
+        img.style.transition = "opacity 0.3s ease";
+        img.style.opacity = "1";
+      }, 10);
+    };
+
+    reader.readAsDataURL(file);
+  }
+});
+
+/* ======================= */
+/* ПЕРЕТАСКИВАНИЕ + МАСШТАБ (DESKTOP + MOBILE) */
+/* ======================= */
+
+function enableDrag(el) {
+  // State variables for touch
+  let touchState = {
+    isTouching: false,
+    isPinching: false,
+    initialDistance: 0,
+    initialWidth: 0,
+    lastTouchX: 0,
+    lastTouchY: 0,
+    elementStartLeft: 0,
+    elementStartTop: 0
+  };
+
+  // Helper: Calculate distance between two touch points
+  function getTouchDistance(touch1, touch2) {
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // ===== DESKTOP MOUSE EVENTS =====
+  el.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    
+    const shiftX = e.clientX - el.offsetLeft;
+    const shiftY = e.clientY - el.offsetTop;
+
+    function moveAt(pageX, pageY) {
+      el.style.left = (pageX - shiftX) + "px";
+      el.style.top = (pageY - shiftY) + "px";
+    }
+
+    function onMouseMove(e) {
+      moveAt(e.pageX, e.pageY);
+    }
+
+    document.addEventListener("mousemove", onMouseMove);
+
+    document.addEventListener("mouseup", function() {
+      document.removeEventListener("mousemove", onMouseMove);
+    }, {once: true});
+  });
+
+  // Mouse wheel zoom (desktop)
+  el.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    let w = parseFloat(el.style.width) || 120;
+    w += e.deltaY < 0 ? 10 : -10;
+    if (w < 40) w = 40;
+    if (w > 400) w = 400;
+    el.style.width = w + "px";
+  }, {passive: false});
+
+  // ===== MOBILE TOUCH EVENTS =====
+  
+  el.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    touchState.isTouching = true;
+
+    if (e.touches.length === 2) {
+      // Two fingers - start pinch zoom
+      touchState.isPinching = true;
+      touchState.initialDistance = getTouchDistance(e.touches[0], e.touches[1]);
+      touchState.initialWidth = parseFloat(el.style.width) || 120;
+      
+    } else if (e.touches.length === 1) {
+      // One finger - start drag
+      touchState.isPinching = false;
+      
+      const touch = e.touches[0];
+      touchState.lastTouchX = touch.clientX;
+      touchState.lastTouchY = touch.clientY;
+      touchState.elementStartLeft = el.offsetLeft;
+      touchState.elementStartTop = el.offsetTop;
+    }
+  }, {passive: false});
+
+  el.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    
+    if (!touchState.isTouching) return;
+
+    if (e.touches.length === 2 && touchState.isPinching) {
+      // Pinch to zoom with two fingers
+      const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
+      const scaleFactor = currentDistance / touchState.initialDistance;
+      
+      let newWidth = touchState.initialWidth * scaleFactor;
+      
+      // Clamp width between 40 and 400
+      if (newWidth < 40) newWidth = 40;
+      if (newWidth > 400) newWidth = 400;
+      
+      el.style.width = newWidth + "px";
+      
+    } else if (e.touches.length === 1 && !touchState.isPinching) {
+      // Drag with one finger
+      const touch = e.touches[0];
+      
+      const deltaX = touch.clientX - touchState.lastTouchX;
+      const deltaY = touch.clientY - touchState.lastTouchY;
+      
+      el.style.left = (touchState.elementStartLeft + deltaX) + "px";
+      el.style.top = (touchState.elementStartTop + deltaY) + "px";
+    }
+  }, {passive: false});
+
+  el.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    
+    if (e.touches.length === 0) {
+      // All fingers lifted
+      touchState.isTouching = false;
+      touchState.isPinching = false;
+      
+    } else if (e.touches.length === 1) {
+      // One finger released from pinch, continue with drag
+      touchState.isPinching = false;
+      
+      const touch = e.touches[0];
+      touchState.lastTouchX = touch.clientX;
+      touchState.lastTouchY = touch.clientY;
+      touchState.elementStartLeft = el.offsetLeft;
+      touchState.elementStartTop = el.offsetTop;
+    }
+  }, {passive: false});
+
+  el.addEventListener('touchcancel', function(e) {
+    e.preventDefault();
+    touchState.isTouching = false;
+    touchState.isPinching = false;
+  }, {passive: false});
+}
+
+/* ======================= */
+/* СОХРАНЕНИЕ */
+/* ======================= */
+
+function saveOutfit() {
+  const imgs = canvas.querySelectorAll("img");
+
+  if (imgs.length === 0) {
+    showNotification("⚠️ Добавьте элементы перед сохранением");
+    return;
+  }
+
+  // Get actual canvas dimensions at save time
+  const canvasRect = canvas.getBoundingClientRect();
+  const actualWidth = canvasRect.width;
+  const actualHeight = canvasRect.height;
+
+  let newOutfit = {
+    canvasWidth: actualWidth,
+    canvasHeight: actualHeight,
+    items: []
+  };
+
+  imgs.forEach(img => {
+    newOutfit.items.push({
+      src: img.src,
+      left: img.style.left,
+      top: img.style.top,
+      width: img.style.width
+    });
+  });
+
+  outfits.push(newOutfit);
+  localStorage.setItem("outfits", JSON.stringify(outfits));
+
+  renderGallery();
+  switchScreen("looks", document.querySelectorAll('.nav button')[2]);
+
+  showNotification("✅ Образ сохранён успешно!");
+}
+
+/* ======================= */
+/* ГАЛЕРЕЯ С ПРОПОРЦИОНАЛЬНЫМ МАСШТАБИРОВАНИЕМ */
+/* ======================= */
+
+function renderGallery() {
+  gallery.innerHTML = "";
+
+  if (outfits.length === 0) {
+    emptyGallery.style.display = 'block';
+    return;
+  }
+
+  emptyGallery.style.display = 'none';
+
+  outfits.forEach((outfit, index) => {
+    const box = document.createElement("div");
+    box.className = "outfit";
+    box.style.opacity = "0";
+    box.style.transform = "translateY(20px)";
+
+    // Get saved canvas dimensions or use defaults
+    const savedWidth = outfit.canvasWidth || CANVAS_REF_WIDTH;
+    const savedHeight = outfit.canvasHeight || CANVAS_REF_HEIGHT;
+
+    // Handle old format (items array directly) vs new format (object with metadata)
+    const items = outfit.items || outfit;
+
+    items.forEach(item => {
+      const img = document.createElement("img");
+      img.src = item.src;
+      img.style.position = "absolute";
+      
+      // Parse saved values
+      const savedLeft = parseFloat(item.left);
+      const savedTop = parseFloat(item.top);
+      const savedWidth_img = parseFloat(item.width);
+
+      // Calculate scale factor based on percentage of original canvas
+      const leftPercent = (savedLeft / savedWidth) * 100;
+      const topPercent = (savedTop / savedHeight) * 100;
+      const widthPercent = (savedWidth_img / savedWidth) * 100;
+
+      img.style.left = leftPercent + "%";
+      img.style.top = topPercent + "%";
+      img.style.width = widthPercent + "%";
+      img.style.pointerEvents = "none";
+      
+      box.appendChild(img);
+    });
+
+    gallery.appendChild(box);
+
+    // Staggered animation
+    setTimeout(() => {
+      box.style.transition = "all 0.4s ease";
+      box.style.opacity = "1";
+      box.style.transform = "translateY(0)";
+    }, index * 50);
+  });
+}
+
+/* ======================= */
+/* УДАЛЕНИЕ ФОНА */
+/* ======================= */
+
+function openBgRemoval() {
+  window.open("https://www.remove.bg/", "_blank");
+}
+
+/* ======================= */
+/* ОЧИСТКА */
+/* ======================= */
+
+function clearCanvas() {
+  const imgs = canvas.querySelectorAll("img");
+  
+  imgs.forEach((img, i) => {
+    setTimeout(() => {
+      img.style.transition = "all 0.3s ease";
+      img.style.opacity = "0";
+      img.style.transform = "scale(0.8)";
+      
+      setTimeout(() => img.remove(), 300);
+    }, i * 50);
+  });
+
+  setTimeout(() => {
+    if (emptyState) emptyState.style.display = 'block';
+  }, imgs.length * 50 + 300);
+  
+  selectedImage = null;
+}
+
+/* ======================= */
+/* NOTIFICATION */
+/* ======================= */
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateX(-50%) translateY(0)';
+  }, 10);
+  
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateX(-50%) translateY(-20px)';
+    setTimeout(() => notification.remove(), 300);
+  }, 2500);
+}
+
+/* ======================= */
+/* АВТО-ЗАГРУЗКА */
+/* ======================= */
+
+renderGallery();
+
+/* ======================= */
+/* ВСТАВКА КАРТИНКИ ЧЕРЕЗ CTRL+V */
+/* ======================= */
+
+document.addEventListener("paste", function (e) {
+  const items = e.clipboardData.items;
+
+  for (let item of items) {
+
+    // Если вставлена картинка
+    if (item.type.indexOf("image") !== -1) {
+      const file = item.getAsFile();
+      const reader = new FileReader();
+
+      reader.onload = function (event) {
+        addImageToCanvas(event.target.result);
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    // Если вставлена ссылка
+    if (item.type === "text/plain") {
+      item.getAsString(function (text) {
+        if (text.startsWith("http")) {
+          addImageToCanvas(text);
+        }
+      });
+    }
+  }
+});
+
+/* ======================= */
+/* ФУНКЦИЯ ДОБАВЛЕНИЯ КАРТИНКИ */
+/* ======================= */
+
+function addImageToCanvas(src) {
+
+  if (emptyState) emptyState.style.display = "none";
+
+  const img = document.createElement("img");
+  img.src = src;
+  img.style.position = "absolute";
+  img.style.left = "40px";
+  img.style.top = "40px";
+  img.style.width = "120px";
+  img.style.cursor = "move";
+  img.style.opacity = "0";
+
+  enableDrag(img);
+
+  // Удаление двойным кликом
+  img.addEventListener("dblclick", function () {
+    if (selectedImage === img) {
+      selectedImage = null;
+    }
+    
+    img.remove();
+
+    if (canvas.querySelectorAll("img").length === 0) {
+      emptyState.style.display = "block";
+    }
+
+    showNotification("🗑️ Картинка удалена");
+  });
+
+  canvas.appendChild(img);
+
+  setTimeout(() => {
+    img.style.transition = "opacity 0.3s ease";
+    img.style.opacity = "1";
+  }, 10);
+}
+
+/* ======================= */
+/* SELECTION SYSTEM */
+/* ======================= */
+
+canvas.addEventListener('click', function(e) {
+  if (e.target.tagName === 'IMG') {
+    // Deselect previous
+    if (selectedImage) {
+      selectedImage.classList.remove('selected');
+    }
+    
+    // Select new
+    selectedImage = e.target;
+    selectedImage.classList.add('selected');
+  } else {
+    // Click on canvas background - deselect
+    if (selectedImage) {
+      selectedImage.classList.remove('selected');
+      selectedImage = null;
+    }
+  }
+});
+
+/* ======================= */
+/* DELETE SELECTED IMAGE */
+/* ======================= */
+
+function deleteSelected() {
+  if (!selectedImage) {
+    showNotification("⚠️ Сначала выберите изображение");
+    return;
+  }
+
+  selectedImage.style.transition = "all 0.3s ease";
+  selectedImage.style.opacity = "0";
+  selectedImage.style.transform = "scale(0.8)";
+  
+  setTimeout(() => {
+    selectedImage.remove();
+    selectedImage = null;
+
+    if (canvas.querySelectorAll("img").length === 0) {
+      emptyState.style.display = "block";
+    }
+    
+    showNotification("🗑️ Изображение удалено");
+  }, 300);
+}
+
+// Delete key support
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (selectedImage && document.getElementById('create').classList.contains('active')) {
+      e.preventDefault();
+      deleteSelected();
+    }
+  }
+});
+
+</script>
+
 </body>
 </html>
